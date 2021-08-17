@@ -1,11 +1,14 @@
 from tkinter import *
+from logic import Brain
 
 BG_COLOR = "#ffffff"
 FONT = ('Arial', 20, 'italic')
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWZYZ    "
 
 class Interface:
-    def __init__(self):
+    def __init__(self, brain: Brain):
+        self.brain = brain
+
         self.window = Tk()
         self.window.title("Hangman")
         self.window.config(padx=20, pady=20, bg=BG_COLOR)
@@ -14,13 +17,13 @@ class Interface:
         self.canvas = Canvas(width=512, height=512, highlightthickness=0)
         self.imgs = []
         self.fill_images()
-        image = self.canvas.create_image(0,0, anchor=NW, image=self.imgs[0])
+        self.image = self.canvas.create_image(0,0, anchor=NW, image=self.imgs[0])
         self.canvas.grid(column=0, row=0, pady=20, columnspan=5)
 
         # ---------------------------- WORD LABEL ------------------------------- #
-        self.word = "_ _ _ _ _ _"
-        self.wordLabel = Label(text= self.word, font = FONT, bg=BG_COLOR).grid(column=0,row=1, columnspan=5)
-
+        self.wordLabel = Label(text="", font=FONT, bg=BG_COLOR)
+        self.wordLabel.grid(column=0,row=1, columnspan=5)
+        self.get_next_question()
         # ---------------------------- LETTER BUTTONS ------------------------------- #
         self.letter_frame = Frame(self.window).grid(column=0,row=2,sticky=W)
         self.btns = []
@@ -44,5 +47,18 @@ class Interface:
             img = PhotoImage(file=f'images/hangman{i}.png')
             self.imgs.append(img)
 
+    def get_next_question(self):
+        if self.brain.has_words_left():
+            self.brain.next_word()
+            self.update_display()
+
+    def update_display(self):
+        self.wordLabel.configure(text=" ".join(self.brain.word_underscore))
+        self.canvas.itemconfig(self.image, image=self.imgs[self.brain.wrong_letters])
+
     def guess(self, letter):
-        print(letter)
+        self.brain.check_letter(letter)
+        for btn in self.btns:
+            if btn['text'] == letter:
+                btn.config(state=DISABLED)
+        self.update_display()

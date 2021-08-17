@@ -3,6 +3,7 @@ class Brain:
     def __init__(self, word_list):
         self.word_num = 0
         self.score = 0
+        self.game_over = False
 
         self.words = word_list
         self.current_word = None
@@ -11,6 +12,9 @@ class Brain:
 
     def has_words_left(self):
         return self.word_num < len(self.words)
+
+    def is_game_over(self):
+        return self.game_over
 
     def next_word(self):
         self.wrong_letters = 0
@@ -24,10 +28,10 @@ class Brain:
 
     def check_letter(self, letter):
         letter = letter.lower()
-        print(letter)
-
         if letter not in self.current_word:
             self.wrong_letters += 1
+            if self.wrong_letters == 7:
+                self.game_over = True
 
         for i in range(len(self.current_word)):
             if letter == self.current_word[i]:

@@ -3,7 +3,7 @@ from logic import Brain
 
 BG_COLOR = "#ffffff"
 FONT = ('Arial', 20, 'italic')
-ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWZYZ    "
+ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ    "
 
 class Interface:
     def __init__(self, brain: Brain):
@@ -33,7 +33,7 @@ class Interface:
                 btn = Button(self.letter_frame, width=6, height=1, font=FONT, text=ALPHABET[i], bd=.5,highlightthickness=0)
 
                 if btn['text'] == ' ':
-                    btn.config(state=DISABLED)
+                    btn.config(state=DISABLED, bd=0, bg=BG_COLOR)
                 else:
                     btn.config(command= lambda x= ALPHABET[i]: self.guess(x))
 
@@ -46,10 +46,11 @@ class Interface:
         for i in range(7):
             img = PhotoImage(file=f'images/hangman{i}.png')
             self.imgs.append(img)
-
+        self.imgs.append(PhotoImage(file="images/gameover.png"))
     def get_next_question(self):
         if self.brain.has_words_left():
             self.brain.next_word()
+            print(self.brain.current_word)
             self.update_display()
 
     def update_display(self):
@@ -61,4 +62,11 @@ class Interface:
         for btn in self.btns:
             if btn['text'] == letter:
                 btn.config(state=DISABLED)
-        self.update_display()
+
+        if self.brain.is_game_over():
+            self.canvas.itemconfig(self.image, image=self.imgs[self.brain.wrong_letters])
+            self.wordLabel.configure(text=" ")
+            for btn in self.btns:
+                btn.config(state=DISABLED)
+        else:
+            self.update_display()
